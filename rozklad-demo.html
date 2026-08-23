@@ -143,12 +143,15 @@
   .whead .wdate{font-weight:800;font-size:11px;opacity:.85}
   .whead.today{background:linear-gradient(180deg,#FF7E6B,#FF5A47)}
   .wtime{background:linear-gradient(180deg,#FFFDF6,#FFF6E6);font-family:var(--disp);font-weight:800;font-size:13px;color:var(--rc,#3B9EF5);display:flex;align-items:center;justify-content:center;border-top:1px solid var(--line);padding:4px}
-  .wcell{border-top:1px solid var(--line);border-right:1px solid var(--line);border-left:5px solid var(--free,#C7D2DA);display:flex}
+  .wcell{border-top:1px solid var(--line);border-right:1px solid var(--line);border-left:5px solid var(--free,#9AA7B0);display:flex}
   .wcell[data-type="Урок"]{--free:var(--blue)}
   .wcell[data-type="Додаткове"]{--free:var(--purple)}
   .wcell[data-type="Гурток"]{--free:var(--pink)}
   .wcell[data-type="Перерва"]{--free:var(--green)}
   .wcell[data-type="Обід"]{--free:var(--gold)}
+  .wcell[data-type="Бокс"]{--free:#FF5A47}
+  .wcell[data-type="Музика"]{--free:#2CC5B8}
+  .wcell[data-type="Вільно"]{--free:#9AA7B0}
   .wcell.todaycol{background:#FFF7F2}
   .wcell textarea{width:100%;border:0;outline:none;resize:none;background:transparent;font:inherit;font-size:13px;font-weight:700;color:var(--ink);padding:7px 8px;line-height:1.3;min-height:44px;overflow:hidden}
   .wcell textarea::placeholder{color:#C9D4DC}
@@ -283,14 +286,6 @@
     <div class="panel notes"><h2>📝 Нотатки</h2><textarea id="notes" placeholder="Що не забути, контрольні, речі до школи…"></textarea></div>
   </div>
 
-  <footer class="legend">
-    <span class="k"><span class="dot" style="background:var(--blue)"></span>Урок</span>
-    <span class="k"><span class="dot" style="background:var(--purple)"></span>Додаткове</span>
-    <span class="k"><span class="dot" style="background:var(--pink)"></span>Гурток</span>
-    <span class="k"><span class="dot" style="background:var(--gold)"></span>Обід</span>
-    <span class="k"><span class="dot" style="background:var(--green)"></span>Перерва</span>
-    <span class="k"><span class="dot" style="background:var(--grey)"></span>Вільно</span>
-  </footer>
 </div>
 
 <div class="lockmask" id="lockmask">
@@ -318,7 +313,8 @@
 
 <script>
   const HOURS=[8,9,10,11,12,13,14,15,16,17,18,19];
-  const TYPES=["Урок","Додаткове","Гурток","Обід","Перерва","Вільно"];
+  const TYPES=["Урок","Додаткове","Гурток","Бокс","Музика","Обід","Перерва","Вільно"];
+  const TCOL={"Урок":"#3B9EF5","Додаткове":"#8B5CF6","Гурток":"#FF5DA2","Бокс":"#FF5A47","Музика":"#2CC5B8","Обід":"#FFB020","Перерва":"#57C368","Вільно":"#9AA7B0"};
   const WD_FULL=["Неділя","Понеділок","Вівторок","Середа","Четвер","П’ятниця","Субота"];
   const WD_SHORT=["Нд","Пн","Вт","Ср","Чт","Пт","Сб"];
   const MON=["січ","лют","бер","кві","тра","чер","лип","сер","вер","жов","лис","гру"];
@@ -341,7 +337,7 @@
   function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){console.error(e);return false;}}
   function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
   function lsKeys(pre){const o=[];for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&key.indexOf(pre)===0)o.push(key);}return o;}
-  function emptyState(){const rows={};HOURS.forEach(h=>rows[h]={type:"Урок",subject:"",hw:""});return{extra:"",clubs:"",notes:"",rows};}
+  function emptyState(){const rows={};HOURS.forEach(h=>rows[h]={type:"Вільно",subject:"",hw:""});return{extra:"",clubs:"",notes:"",rows};}
   function loadState(child,d){const s=lsGet(keyFor(child,d));return s||emptyState();}
   function saveState(child,d,s){if(lsSet(keyFor(child,d),s))flashSaved();}
   let flashT;function flashSaved(){els.saveNote.classList.add('show');clearTimeout(flashT);flashT=setTimeout(()=>els.saveNote.classList.remove('show'),1200);}
@@ -375,7 +371,7 @@
   // DAY
   const dayBoard=$('dayBoard'),nowline=$('nowline');
   HOURS.forEach((h,i)=>{
-    const row=document.createElement('div');row.className='row';row.dataset.hour=h;row.style.setProperty('--rc',RC[i%RC.length]);
+    const row=document.createElement('div');row.className='row';row.dataset.hour=h;row.style.setProperty('--rc','#9AA7B0');
     const opts=TYPES.map(t=>`<option value="${t}">${t}</option>`).join('');
     row.innerHTML=`
       <div class="cell-time"><span class="t1">${String(h).padStart(2,'0')}:00</span><span class="t2">${String(h+1).padStart(2,'0')}:00</span></div>
@@ -385,10 +381,11 @@
     dayBoard.insertBefore(row,nowline);
   });
   dayBoard.querySelectorAll('textarea').forEach(t=>t.dataset.min=52);
+  function paintRow(r){const t=r.querySelector('[data-k=type]').value;r.style.setProperty('--rc',TCOL[t]||'#9AA7B0');}
 
   function applyDay(state){
     els.extra.value=state.extra||"";els.clubs.value=state.clubs||"";els.notes.value=state.notes||"";
-    dayBoard.querySelectorAll('.row').forEach(r=>{const d=(state.rows&&state.rows[r.dataset.hour])||{type:"Урок",subject:"",hw:""};const sel=r.querySelector('[data-k=type]');sel.value=d.type||"Урок";r.querySelector('[data-k=subject]').value=d.subject||"";r.querySelector('[data-k=hw]').value=d.hw||"";});
+    dayBoard.querySelectorAll('.row').forEach(r=>{const d=(state.rows&&state.rows[r.dataset.hour])||{type:"Вільно",subject:"",hw:""};const sel=r.querySelector('[data-k=type]');sel.value=d.type||"Вільно";paintRow(r);r.querySelector('[data-k=subject]').value=d.subject||"";r.querySelector('[data-k=hw]').value=d.hw||"";});
     dayBoard.querySelectorAll('textarea').forEach(autolen);[els.extra,els.clubs,els.notes].forEach(autolen);
   }
   function collectDay(){const rows={};dayBoard.querySelectorAll('.row').forEach(r=>{rows[r.dataset.hour]={type:r.querySelector('[data-k=type]').value,subject:r.querySelector('[data-k=subject]').value,hw:r.querySelector('[data-k=hw]').value};});return{extra:els.extra.value,clubs:els.clubs.value,notes:els.notes.value,rows};}
@@ -414,7 +411,7 @@
     wgrid.innerHTML='';
     const corner=document.createElement('div');corner.className='whead corner';corner.innerHTML='<div class="wd">Час</div>';wgrid.appendChild(corner);
     dates.forEach(d=>{const dt=parse(d);const h=document.createElement('div');h.className='whead'+(d===todayStr?' today':'');h.dataset.date=d;h.innerHTML=`<div class="wd">${WD_SHORT[dt.getDay()]}</div><div class="wdate">${String(dt.getDate()).padStart(2,'0')}.${String(dt.getMonth()+1).padStart(2,'0')}</div>`;h.title='Відкрити цей день';wgrid.appendChild(h);});
-    HOURS.forEach((hr,i)=>{const t=document.createElement('div');t.className='wtime';t.style.setProperty('--rc',RC[i%RC.length]);t.textContent=String(hr).padStart(2,'0')+':00';wgrid.appendChild(t);dates.forEach(d=>{const cell=document.createElement('div');cell.className='wcell'+(d===todayStr?' todaycol':'');const rd=(weekCache[d].rows&&weekCache[d].rows[hr])||{type:"Урок",subject:""};cell.dataset.type=rd.type||"Урок";cell.dataset.date=d;cell.dataset.hour=hr;const ta=document.createElement('textarea');ta.value=rd.subject||"";ta.placeholder="—";ta.dataset.min=44;cell.appendChild(ta);wgrid.appendChild(cell);});});
+    HOURS.forEach((hr,i)=>{const t=document.createElement('div');t.className='wtime';t.style.setProperty('--rc',RC[i%RC.length]);t.textContent=String(hr).padStart(2,'0')+':00';wgrid.appendChild(t);dates.forEach(d=>{const cell=document.createElement('div');cell.className='wcell'+(d===todayStr?' todaycol':'');const rd=(weekCache[d].rows&&weekCache[d].rows[hr])||{type:"Вільно",subject:""};cell.dataset.type=rd.type||"Вільно";cell.dataset.date=d;cell.dataset.hour=hr;const ta=document.createElement('textarea');ta.value=rd.subject||"";ta.placeholder="—";ta.dataset.min=44;cell.appendChild(ta);wgrid.appendChild(cell);});});
     wgrid.querySelectorAll('textarea').forEach(autolen);
   }
   let weekSaveT;
@@ -427,7 +424,7 @@
   function switchView(v){view=v;$('tabDay').classList.toggle('active',v==='day');$('tabWeek').classList.toggle('active',v==='week');$('dayBoard').style.display=v==='day'?'block':'none';$('weekBoard').style.display=v==='week'?'block':'none';$('weekNav').style.display=v==='week'?'inline-flex':'none';els.dayName.style.display=v==='day'?'inline-block':'none';$('clearBtn').style.display=v==='day'?'inline-flex':'none';if(v==='week')renderWeek();else updateNowline();}
 
   document.addEventListener('input',e=>{if(e.target.matches('.row textarea, .panel textarea'))scheduleDaySave();});
-  document.addEventListener('change',e=>{if(e.target.classList.contains('type-sel'))scheduleDaySave();});
+  document.addEventListener('change',e=>{if(e.target.classList.contains('type-sel')){paintRow(e.target.closest('.row'));scheduleDaySave();}});
   document.querySelectorAll('.panel textarea').forEach(t=>{t.dataset.min=130;t.addEventListener('input',()=>autolen(t));});
   els.date.addEventListener('change',()=>{if(view==='day')refreshDay();else{updateDayName();renderWeek();}});
   $('tabDay').addEventListener('click',()=>switchView('day'));
