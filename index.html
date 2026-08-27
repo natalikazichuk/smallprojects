@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мої проєкти — natalikazichuk</title>
+<meta name="theme-color" content="#6C4DF6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B1A2E;
+    --muted:#615F7A;
+    --paper:#F4F2FC;
+    --card:#FFFFFF;
+    --line:#E7E4F5;
+    --violet:#6C4DF6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Manrope',system-ui,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(circle at 12% -5%, rgba(108,77,246,.14), transparent 42%),
+      radial-gradient(circle at 92% 6%, rgba(255,92,138,.12), transparent 40%);
+    background-attachment:fixed;
+  }
+  body::before{
+    content:"";
+    position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22460%22%20height%3D%22300%22%3E%0A%3Cstyle%3Etext%7Bfont-family%3A%27Courier%20New%27%2Cmonospace%3Bfont-size%3A13px%3Bfont-weight%3A600%7D%3C%2Fstyle%3E%0A%3Cg%3E%0A%3Ctext%20x%3D%2214%22%20y%3D%2226%22%20fill%3D%22%238A86B8%22%3E%2F%2F%20rozklad.js%20%E2%80%94%20PWA%3C%2Ftext%3E%0A%3Ctext%20x%3D%2214%22%20y%3D%2252%22%3E%3Ctspan%20fill%3D%22%236C4DF6%22%3Econst%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3E%20rozklad%20%3D%20%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%2317C3B2%22%3EloadSchedule%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3E%28%29%3B%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3Ctext%20x%3D%2214%22%20y%3D%2278%22%3E%3Ctspan%20fill%3D%22%236C4DF6%22%3Efunction%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3E%20addChild%28name%29%20%7B%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3Ctext%20x%3D%2234%22%20y%3D%22104%22%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3Echildren.push%28%7B%20%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%23FF5C8A%22%3Ename%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3E%20%7D%29%3B%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3Ctext%20x%3D%2214%22%20y%3D%22130%22%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3E%7D%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3Ctext%20x%3D%2214%22%20y%3D%22156%22%3E%3Ctspan%20fill%3D%22%2317C3B2%22%3ElocalStorage%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3E.setItem%28%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%23FF5C8A%22%3E%27rozklad%27%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3E%2C%20data%29%3B%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3Ctext%20x%3D%2214%22%20y%3D%22182%22%3E%3Ctspan%20fill%3D%22%236C4DF6%22%3Eif%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3E%20%28trialExpired%29%20%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%23FF9F1C%22%3EshowPaywall%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3E%28%29%3B%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3Ctext%20x%3D%2214%22%20y%3D%22208%22%3E%3Ctspan%20fill%3D%22%23E84393%22%3E%26lt%3Bdiv%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3E%20class%3D%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%23FF5C8A%22%3E%22lesson%22%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%23E84393%22%3E%26gt%3B%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3E%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D0%BA%D0%B0%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3Ctext%20x%3D%2214%22%20y%3D%22234%22%3E%3Ctspan%20fill%3D%22%236C4DF6%22%3Ereturn%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3E%20children.map%28render%29%3B%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3Ctext%20x%3D%2214%22%20y%3D%22260%22%20fill%3D%22%238A86B8%22%3E%2F%2F%20install%20%E2%86%92%20Add%20to%20Home%20Screen%3C%2Ftext%3E%0A%3Ctext%20x%3D%2214%22%20y%3D%22286%22%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3E.card%3Ahover%20%7B%20transform%3A%20%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%2306D6A0%22%3Elift%3C%2Ftspan%3E%3Ctspan%20fill%3D%22%231B1A2E%22%3E%3B%20%7D%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3C%2Fg%3E%0A%3C%2Fsvg%3E");
+    background-size:460px 300px;
+    opacity:.28;
+    -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 55%,transparent 100%);
+    mask-image:linear-gradient(180deg,#000 0%,#000 55%,transparent 100%);
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px;position:relative}
+
+  /* Header */
+  header{padding:64px 0 36px}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-weight:700;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--violet);
+    background:#EEE9FE;border:1px solid var(--line);
+    padding:6px 14px;border-radius:999px;
+  }
+  .eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--violet)}
+  h1{
+    font-family:'Unbounded',sans-serif;font-weight:900;
+    font-size:clamp(2.6rem,10vw,5rem);line-height:.98;
+    letter-spacing:-.02em;margin:22px 0 18px;
+  }
+  h1 em{font-style:normal;color:var(--violet)}
+  .lead{font-size:clamp(1rem,3.5vw,1.2rem);color:var(--muted);max-width:34ch}
+  .lead a{color:var(--ink);font-weight:600;text-decoration:none;border-bottom:2px solid var(--violet)}
+
+  /* Grid */
+  .grid{
+    display:grid;grid-template-columns:1fr;gap:20px;
+    padding:16px 0 56px;
+  }
+  @media(min-width:600px){.grid{grid-template-columns:1fr 1fr}}
+  @media(min-width:920px){.grid{grid-template-columns:1fr 1fr 1fr}}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);
+    border-radius:22px;overflow:hidden;
+    display:flex;flex-direction:column;
+    text-decoration:none;color:inherit;
+    transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  }
+  .card:hover,.card:focus-visible{
+    transform:translateY(-6px);
+    box-shadow:0 22px 40px -22px var(--c,rgba(27,26,46,.4));
+    border-color:var(--c);
+    outline:none;
+  }
+  .thumb{
+    position:relative;aspect-ratio:16/10;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 55%,#000));
+  }
+  .thumb img{
+    position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;
+  }
+  .thumb-letter{
+    font-family:'Unbounded',sans-serif;font-weight:900;
+    font-size:3.4rem;color:rgba(255,255,255,.92);
+    text-shadow:0 4px 20px rgba(0,0,0,.25);
+  }
+  .body{padding:20px 20px 22px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .tag{
+    align-self:flex-start;
+    font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--c);background:color-mix(in srgb,var(--c) 12%,#fff);
+    padding:4px 11px;border-radius:999px;
+  }
+  .card h2{font-family:'Unbounded',sans-serif;font-weight:700;font-size:1.22rem;line-height:1.1}
+  .card p{color:var(--muted);font-size:.92rem;flex:1}
+  .open{
+    display:inline-flex;align-items:center;gap:7px;
+    font-weight:700;font-size:.9rem;color:var(--c);margin-top:4px;
+  }
+  .open svg{transition:transform .2s ease}
+  .card:hover .open svg{transform:translateX(4px)}
+
+  footer{
+    border-top:1px solid var(--line);padding:28px 0 60px;
+    color:var(--muted);font-size:.9rem;
+    display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;
+  }
+  footer a{color:var(--ink);font-weight:600;text-decoration:none}
+  footer a:hover{color:var(--violet)}
+
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">Портфоліо</span>
+    <h1>Мої<br><em>проєкти</em></h1>
+    <p class="lead">Невеликі вебзастосунки, які я створюю для родини та роботи. Розробка — <a href="https://github.com/natalikazichuk" target="_blank" rel="noopener">@natalikazichuk</a></p>
+  </header>
+
+  <main class="grid">
+
+    <a class="card" href="./rozklad.html" style="--c:#6C4DF6">
+      <div class="thumb"><span class="thumb-letter">Р</span><img src="rozklad.jpg" alt="Розклад уроків" loading="lazy" onerror="this.style.display='none'"></div>
+      <div class="body">
+        <span class="tag">Вебзастосунок</span>
+        <h2>Розклад уроків</h2>
+        <p>Шкільний розклад для кількох дітей: щоденний і тижневий вигляд, домашні завдання та нотатки. Працює офлайн, встановлюється як застосунок.</p>
+        <span class="open">Відкрити <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <a class="card" href="./rozklad-demo.html" style="--c:#17C3B2">
+      <div class="thumb"><span class="thumb-letter">Д</span><img src="rozklad-demo.jpg" alt="Розклад — демоверсія" loading="lazy" onerror="this.style.display='none'"></div>
+      <div class="body">
+        <span class="tag">Демо</span>
+        <h2>Розклад — демо</h2>
+        <p>Пробна версія розкладу на 14 днів із розблокуванням повного доступу за кодом.</p>
+        <span class="open">Відкрити демо <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <a class="card" href="./rodyna.html" style="--c:#FF5C8A">
+      <div class="thumb"><span class="thumb-letter">Р</span><img src="rodyna.jpg" alt="Родина" loading="lazy" onerror="this.style.display='none'"></div>
+      <div class="body">
+        <span class="tag">Вебсторінка</span>
+        <h2>Родина</h2>
+        <p>Сторінка родинного проєкту.</p>
+        <span class="open">Відкрити <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <a class="card" href="./generator-kodu.html" style="--c:#FF9F1C">
+      <div class="thumb"><span class="thumb-letter">Г</span><img src="generator-kodu.jpg" alt="Генератор кодів" loading="lazy" onerror="this.style.display='none'"></div>
+      <div class="body">
+        <span class="tag">Інструмент</span>
+        <h2>Генератор кодів</h2>
+        <p>Створює коди розблокування за кодом пристрою покупця.</p>
+        <span class="open">Відкрити <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <a class="card" href="./anna-nails.jsx" style="--c:#E84393">
+      <div class="thumb"><span class="thumb-letter">A</span><img src="anna-nails.jpg" alt="Anna Nails" loading="lazy" onerror="this.style.display='none'"></div>
+      <div class="body">
+        <span class="tag">Лендинг</span>
+        <h2>Anna Nails</h2>
+        <p>Сторінка-візитівка для майстрині манікюру.</p>
+        <span class="open">Дивитись код <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+    <a class="card" href="./google-play-app.jsx" style="--c:#06D6A0">
+      <div class="thumb"><span class="thumb-letter">G</span><img src="google-play-app.jpg" alt="Google Play застосунок" loading="lazy" onerror="this.style.display='none'"></div>
+      <div class="body">
+        <span class="tag">Лендинг</span>
+        <h2>Google Play застосунок</h2>
+        <p>Промосторінка застосунку для Google Play.</p>
+        <span class="open">Дивитись код <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </a>
+
+  </main>
+
+  <footer>
+    <span>© 2026 natalikazichuk</span>
+    <a href="https://github.com/natalikazichuk" target="_blank" rel="noopener">GitHub →</a>
+  </footer>
+
+</div>
+</body>
+</html>
