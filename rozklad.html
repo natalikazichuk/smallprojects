@@ -60,14 +60,16 @@
   /* header */
   header.top{display:flex;flex-wrap:wrap;gap:16px 26px;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
   .brand{display:flex;flex-direction:column;gap:2px}
-  .brand .eyebrow{font-family:var(--disp);font-weight:800;font-size:clamp(15px,2.4vw,20px);letter-spacing:.14em;text-transform:uppercase;color:#2E7BE4;-webkit-text-stroke:1px #fff;paint-order:stroke fill;margin-left:6px}
-  .brand h1{font-family:var(--disp);font-weight:800;font-size:clamp(46px,9vw,86px);line-height:.86;margin:0;letter-spacing:.01em;-webkit-text-stroke:4px #fff;paint-order:stroke fill;filter:drop-shadow(0 5px 0 rgba(60,80,120,.18))}
+  .brand .eyebrow{font-family:var(--disp);font-weight:800;font-size:clamp(12px,1.8vw,15px);letter-spacing:.14em;text-transform:uppercase;color:#2E7BE4;-webkit-text-stroke:1px #fff;paint-order:stroke fill;margin-left:4px}
+  .brand h1{font-family:var(--disp);font-weight:800;font-size:clamp(30px,5vw,48px);line-height:.9;margin:0;letter-spacing:.01em;-webkit-text-stroke:3px #fff;paint-order:stroke fill;filter:drop-shadow(0 4px 0 rgba(60,80,120,.18))}
   .brand h1 .l1{color:var(--purple);display:block}
   .brand h1 .l2{color:var(--orange);display:block}
-  .head-fields{display:flex;flex-wrap:wrap;gap:14px;padding-top:6px}
-  .field{background:var(--card);border:0;border-radius:20px;padding:12px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:2px;min-width:200px}
-  .field label{font-weight:800;font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:7px}
-  .field input{border:0;background:transparent;font:inherit;font-size:18px;font-weight:800;color:var(--ink);outline:none;padding:2px 0;width:100%}
+  /* combined date + today block */
+  .datebox{background:var(--card);border:0;border-radius:20px;padding:10px 12px 10px 16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .datebox .db-field{display:flex;flex-direction:column;gap:2px}
+  .datebox label{font-weight:800;font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:7px}
+  .datebox input{border:0;background:transparent;font:inherit;font-size:18px;font-weight:800;color:var(--ink);outline:none;padding:2px 0}
+  .datebox .btn.today{padding:10px 16px}
 
   /* child bar */
   .childbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;background:var(--card);border-radius:20px;padding:12px 14px;box-shadow:var(--shadow)}
@@ -92,8 +94,9 @@
   .seg button{font:inherit;font-weight:800;font-size:15px;border:0;background:transparent;color:var(--ink-soft);padding:8px 22px;border-radius:999px;cursor:pointer;transition:.15s}
   .seg button.active{background:linear-gradient(180deg,#FFA24E,#F5731E);color:#fff;box-shadow:0 5px 12px -5px rgba(245,115,30,.8)}
   .day-name{font-family:var(--disp);font-weight:800;font-size:17px;color:#fff;background:linear-gradient(180deg,#5BB8FF,#3B9EF5);padding:8px 18px;border-radius:999px;box-shadow:0 5px 12px -6px rgba(59,158,245,.8)}
-  .week-nav{display:inline-flex;align-items:center;gap:8px}
+  .week-nav,.day-nav{display:inline-flex;align-items:center;gap:8px}
   .week-nav .wlabel{font-weight:800;font-size:15px;color:var(--blue-d);min-width:160px;text-align:center;background:#fff;border-radius:999px;padding:8px 14px;box-shadow:var(--shadow-sm)}
+  .day-nav .day-name{min-width:130px}
   .spacer{flex:1}
   .btn{font:inherit;font-weight:800;font-size:15px;cursor:pointer;border:0;color:#fff;padding:11px 20px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;transition:transform .08s, filter .15s;box-shadow:var(--shadow-sm)}
   .btn:hover{filter:brightness(1.05)}
@@ -191,13 +194,38 @@
     .week-nav .wlabel{min-width:120px}
     .cb-hint{display:none}
   }
+  /* print mirror: hidden on screen, shown instead of textareas when printing */
+  .print-mirror{display:none}
   @media print{
-    body{background:#fff;padding:0}
-    .decor,.grass,.toolbar,.legend .k+.k::before{}
-    .toolbar,.childbar .x,.addchild,.cb-hint,#nowline{display:none}
-    .decor,.grass{display:none}
-    .panel,.field,.childbar,.row,.row-head,.wgrid{box-shadow:none}
+    @page{margin:9mm}
+    html,body{background:#fff}
+    body{padding:0;color:#000}
+    .decor,.grass,#nowline{display:none !important}
+    .toolbar,.childbar .x,.addchild,.cb-hint,.save-note,.seg,.day-nav,.week-nav,.datebox .btn.today{display:none !important}
+    .wrap{max-width:100%}
+    header.top{margin-bottom:8px}
+    .brand h1{font-size:30px;-webkit-text-stroke:2px #fff;filter:none}
+    .brand .eyebrow{font-size:12px}
+    .datebox{padding:6px 12px;box-shadow:none}
+    .datebox input{font-size:15px}
+    .childbar{padding:6px 12px;margin-bottom:8px}
+    .panel,.datebox,.childbar,.row,.row-head,.wgrid{box-shadow:none !important}
     .wscroll{overflow:visible}.wgrid{min-width:0}
+    /* keep each lesson row together on a page */
+    .row{break-inside:avoid;page-break-inside:avoid;margin-top:6px}
+    .row-head{font-size:11px}
+    .row-head>div{padding:8px 10px}
+    .cell-time .t1{font-size:16px}
+    .panels{break-inside:avoid;page-break-inside:avoid;gap:10px;margin-top:12px}
+    /* replace all textareas with auto-expanding text so nothing is clipped */
+    textarea{display:none !important}
+    .cell-subj::after{display:none}
+    .hwstar{display:none !important}
+    .print-mirror{display:block !important;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;font-family:var(--body);font-weight:700;color:#000;line-height:1.3}
+    .cell-subj .print-mirror{font-size:13px;padding:2px 0}
+    .cell-hw .print-mirror{font-size:12px;border:1px solid #D8E2EC;border-radius:8px;padding:6px 8px;background:#fff;min-height:0}
+    .wcell .print-mirror{font-size:11px;padding:4px 6px}
+    .panel .print-mirror{font-size:13px;padding:10px 14px;min-height:0}
   }
 </style>
 </head>
@@ -216,8 +244,9 @@
       <span class="eyebrow">Щоденний планер</span>
       <h1><span class="l1">Розклад</span><span class="l2">уроків</span></h1>
     </div>
-    <div class="head-fields">
-      <div class="field"><label for="date">📅 Дата</label><input type="date" id="date"></div>
+    <div class="datebox">
+      <div class="db-field"><label for="date">📅 Дата</label><input type="date" id="date"></div>
+      <button class="btn today" id="todayBtn">⭐ Сьогодні</button>
     </div>
   </header>
 
@@ -230,7 +259,11 @@
 
   <div class="toolbar">
     <div class="seg"><button id="tabDay" class="active">День</button><button id="tabWeek">Тиждень</button></div>
-    <span class="day-name" id="dayName">—</span>
+    <span class="day-nav" id="dayNav">
+      <button class="btn mini" id="prevDay" title="Попередній день">◀</button>
+      <span class="day-name" id="dayName">—</span>
+      <button class="btn mini" id="nextDay" title="Наступний день">▶</button>
+    </span>
     <span class="week-nav" id="weekNav" style="display:none">
       <button class="btn mini" id="prevWeek">◀</button>
       <span class="wlabel" id="weekLabel">—</span>
@@ -238,9 +271,7 @@
     </span>
     <span class="save-note" id="saveNote">збережено ✓</span>
     <span class="spacer"></span>
-    <button class="btn today" id="todayBtn">⭐ Сьогодні</button>
     <button class="btn print" id="printBtn">🖨️ Друк / PDF</button>
-    <button class="btn clear" id="clearBtn">🔄 Очистити день</button>
   </div>
 
   <div class="board" id="dayBoard">
@@ -368,7 +399,7 @@
   // shared
   function updateDayName(){const d=els.date.value;els.dayName.textContent=d?WD_FULL[parse(d).getDay()]:'—';}
   async function refreshDay(){applyDay(await loadState(cur,els.date.value));updateDayName();updateNowline();}
-  function switchView(v){view=v;$('tabDay').classList.toggle('active',v==='day');$('tabWeek').classList.toggle('active',v==='week');$('dayBoard').style.display=v==='day'?'block':'none';$('weekBoard').style.display=v==='week'?'block':'none';$('weekNav').style.display=v==='week'?'inline-flex':'none';els.dayName.style.display=v==='day'?'inline-block':'none';$('clearBtn').style.display=v==='day'?'inline-flex':'none';if(v==='week')renderWeek();else updateNowline();}
+  function switchView(v){view=v;$('tabDay').classList.toggle('active',v==='day');$('tabWeek').classList.toggle('active',v==='week');$('dayBoard').style.display=v==='day'?'block':'none';$('weekBoard').style.display=v==='week'?'block':'none';$('dayNav').style.display=v==='day'?'inline-flex':'none';$('weekNav').style.display=v==='week'?'inline-flex':'none';if(v==='week')renderWeek();else updateNowline();}
 
   document.addEventListener('input',e=>{if(e.target.matches('.row textarea, .panel textarea'))scheduleDaySave();});
   document.addEventListener('change',e=>{if(e.target.classList.contains('type-sel')){paintRow(e.target.closest('.row'));scheduleDaySave();}});
@@ -378,9 +409,23 @@
   $('tabWeek').addEventListener('click',()=>switchView('week'));
   $('prevWeek').addEventListener('click',()=>{els.date.value=fmt(addDays(mondayOf(els.date.value),-7));updateDayName();renderWeek();});
   $('nextWeek').addEventListener('click',()=>{els.date.value=fmt(addDays(mondayOf(els.date.value),7));updateDayName();renderWeek();});
+  async function goDay(delta){await flushSaves();els.date.value=fmt(addDays(parse(els.date.value),delta));await refreshDay();}
+  $('prevDay').addEventListener('click',()=>goDay(-1));
+  $('nextDay').addEventListener('click',()=>goDay(1));
   $('todayBtn').addEventListener('click',()=>{els.date.value=fmt(new Date());updateDayName();view==='day'?refreshDay():renderWeek();});
   $('printBtn').addEventListener('click',()=>window.print());
-  $('clearBtn').addEventListener('click',async()=>{if(!confirm('Очистити весь розклад на цей день?'))return;applyDay(emptyState());await saveState(cur,els.date.value,collectDay());});
+
+  // Друк/PDF: показуємо повний текст замість textarea, щоб нічого не обрізалось
+  function buildPrintMirror(){
+    document.querySelectorAll('textarea').forEach(ta=>{
+      if(ta._mirror)return;
+      const d=document.createElement('div');d.className='print-mirror';d.textContent=ta.value;
+      ta._mirror=d;ta.parentNode.insertBefore(d,ta.nextSibling);
+    });
+  }
+  function clearPrintMirror(){document.querySelectorAll('.print-mirror').forEach(d=>d.remove());document.querySelectorAll('textarea').forEach(ta=>{ta._mirror=null;});}
+  window.addEventListener('beforeprint',buildPrintMirror);
+  window.addEventListener('afterprint',clearPrintMirror);
 
   (async function init(){els.date.value=fmt(new Date());await loadKids();renderPills();await refreshDay();setInterval(updateNowline,30000);window.addEventListener('resize',()=>{if(view==='day')updateNowline();});})();
 </script>
