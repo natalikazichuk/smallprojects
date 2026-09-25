@@ -645,9 +645,10 @@ body{font-family:'Nunito',sans-serif;color:var(--ink);min-height:100vh;position:
             m.memories.forEach(function(x){ if(x && !x.id) x.id=newId(); });
           });
           reindex();
+          var fixed = fillKidParents();   // старі записи: син/донька без parentId
           applyLocalPhotos();   // фото беремо з локального кешу (у хмарі їх немає)
           // якщо seed — одразу збережемо, щоб зафіксувати скелет
-          if(!(Array.isArray(list)&&list.length)) persist(true);
+          if(!(Array.isArray(list)&&list.length) || fixed) persist(true);
           resolveMe();
           render();
         }
@@ -675,6 +676,19 @@ body{font-family:'Nunito',sans-serif;color:var(--ink);min-height:100vh;position:
     }
 
     function reindex(){ byId={}; members.forEach(function(m){ byId[m.id]=m; }); }
+
+    /* «Син»/«Донька» в дереві — це діти вузла «Я» (self). Якщо батька не обрано,
+       привʼязуємо до нього, щоб parentId не лишався null. */
+    var KID_RELS = ['son','daughter'];
+    function selfId(){ var s = one('self'); return s ? s.id : null; }
+    function fillKidParents(){
+      var sid = selfId(), n = 0;
+      if(!sid) return 0;
+      members.forEach(function(m){
+        if(KID_RELS.indexOf(m.rel)>=0 && (!m.parentId || !byId[m.parentId]) && m.id!==sid){ m.parentId = sid; n++; }
+      });
+      return n;
+    }
 
     /* ── Кеш у localStorage (та джерело для демо) ── */
     function readCache(){ try{ var s=localStorage.getItem('sk_dynasty'); var a=s?JSON.parse(s):[]; return Array.isArray(a)?a:[]; }catch(e){ return []; } }
@@ -1186,7 +1200,7 @@ body{font-family:'Nunito',sans-serif;color:var(--ink);min-height:100vh;position:
         name: $('fName').value.trim(),
         emoji: _pickedAva,
         photo: _pickedPhoto,
-        parentId: ($('fParent').value || null),
+        parentId: ($('fParent').value || (KID_RELS.indexOf(relKey)>=0 ? selfId() : null)),
         gender: r.gender,
         birth: $('fBirth').value.trim(),
         deceased: $('fGone').checked,
