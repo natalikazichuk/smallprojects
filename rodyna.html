@@ -3,14 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌳 Наша РОДИНА — SchoolKingdoms</title>
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="manifest" href="manifest.webmanifest">
+<title>🌳 Наша РОДИНА</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
-<script type="module" src="firebase-config.js"></script>
 <style>
 :root{
   /* Спільна денна палітра сайту: небесна блакить, золото, темно-синій текст.
@@ -373,11 +369,9 @@ body{font-family:'Nunito',sans-serif;color:var(--ink);min-height:100vh;position:
 
   <!-- ── Хедер ── -->
   <header class="fam-hd">
-    <a class="hd-brand" href="parent.html" aria-label="SchoolKingdoms">
-      <img class="hd-logo" src="logo-small.png" alt=""
-           onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'">
-      <span class="hd-crest" style="display:none">🌳</span>
-      <span><span class="hd-name">School<b>Kingdoms</b></span>
+    <a class="hd-brand" href="#" aria-label="Наша Родина">
+      <span class="hd-crest">🌳</span>
+      <span><span class="hd-name">Наша <b>Родина</b></span>
       <span class="hd-sub">Родинне дерево</span></span>
     </a>
   </header>
@@ -409,9 +403,6 @@ body{font-family:'Nunito',sans-serif;color:var(--ink);min-height:100vh;position:
       <button class="action-card ac-cream" data-act="stories">
         <span class="ic">📖</span><span class="tx"><span class="tt">Сімейні історії</span><span class="ss">Розповіді та традиції</span></span><span class="arw">›</span>
       </button>
-      <a class="action-card ac-blue" href="karta.html">
-        <span class="ic">📍</span><span class="tx"><span class="tt">Карта роду</span><span class="ss">Звідки ми родом</span></span><span class="arw">›</span>
-      </a>
     </div>
   </main>
 
@@ -547,11 +538,10 @@ body{font-family:'Nunito',sans-serif;color:var(--ink);min-height:100vh;position:
 
   <!-- ── Нижня навігація (мобільна панель, як на інших сторінках) ── -->
   <nav class="botnav">
-    <a class="on" href="rodyna.html"><span class="ic">🏠</span>Головна</a>
+    <a class="on" href="#"><span class="ic">🏠</span>Головна</a>
     <a data-scroll="tree"><span class="ic">👪</span>Моя сім'я</a>
     <a data-act="album"><span class="ic">🖼</span>Альбом</a>
     <a data-act="stories"><span class="ic">📖</span>Історії</a>
-    <a href="igry.html"><span class="ic">🎮</span>Ігри</a>
     <a data-act="ach"><span class="ic">🏆</span>Досягнення</a>
   </nav>
 
@@ -613,7 +603,6 @@ body{font-family:'Nunito',sans-serif;color:var(--ink);min-height:100vh;position:
     var PHOTO_MAX_DIM = 256;              // максимальна сторона, px
     var PHOTO_MAX_FILE = 8*1024*1024;     // максимум вхідного файлу, байт
     var PHOTO_MAX_DATA = 160*1024;        // ціль для стисненого dataURL, байт
-    var _canWrite = false;   // чи є сесія user (можна писати у Firestore)
 
     function $(id){ return document.getElementById(id); }
     function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
@@ -629,50 +618,21 @@ body{font-family:'Nunito',sans-serif;color:var(--ink);min-height:100vh;position:
       });
     }
 
-    /* ── Завантаження ── */
-    function whenSK(cb){ var n=0;(function w(){ if(window.SK&&window.SK.ready){cb();return;} if(n++<120)setTimeout(w,50); else cb(); })(); }
-
+    /* ── Завантаження: дані живуть лише в localStorage цього пристрою ── */
     function load(){
-      whenSK(function(){
-        var done=false;
-        function boot(list, canWrite, parent){
-          if(done) return; done=true;
-          _canWrite = !!canWrite;
-          members = (Array.isArray(list)&&list.length) ? list : seedTree();
-          members.forEach(function(m){
-            if(!m.id)m.id=newId();
-            if(!m.memories)m.memories=[];
-            m.memories.forEach(function(x){ if(x && !x.id) x.id=newId(); });
-          });
-          reindex();
-          var fixed = fillKidParents();   // старі записи: син/донька без parentId
-          applyLocalPhotos();   // фото беремо з локального кешу (у хмарі їх немає)
-          // якщо seed — одразу збережемо, щоб зафіксувати скелет
-          if(!(Array.isArray(list)&&list.length) || fixed) persist(true);
-          resolveMe();
-          render();
-        }
-        if(window.SK && window.SK.ready){
-          window.SK.ready.then(function(u){
-            // сесія Героя: показуємо кеш (лише перегляд); сесія user: повний доступ
-            if(u && window.SK.isParentSession && window.SK.isParentSession() && window.SK.getDynasty){
-              Promise.all([window.SK.getDynasty(), (window.SK.getParent?window.SK.getParent():null)])
-                .then(function(res){
-                  var list=res[0]||[]; var parent=res[1]||null;
-                  // якщо у хмарі порожньо — підхопимо локальний кеш
-                  if(!list.length){ var lc=readCache(); if(lc.length) list=lc; }
-                  boot(list, true, parent);
-                })
-                .catch(function(){ boot(readCache(), true, null); });
-            } else {
-              // немає сесії user → демо-режим із локального кешу
-              boot(readCache(), false, null);
-            }
-          }).catch(function(){ boot(readCache(), false, null); });
-        } else {
-          boot(readCache(), false, null);
-        }
+      var list = readCache();
+      members = list.length ? list : seedTree();
+      members.forEach(function(m){
+        if(!m.id)m.id=newId();
+        if(!m.memories)m.memories=[];
+        m.memories.forEach(function(x){ if(x && !x.id) x.id=newId(); });
       });
+      reindex();
+      var fixed = fillKidParents();   // старі записи: син/донька без parentId
+      // якщо seed — одразу збережемо, щоб зафіксувати скелет
+      if(!list.length || fixed) persist(true);
+      resolveMe();
+      render();
     }
 
     function reindex(){ byId={}; members.forEach(function(m){ byId[m.id]=m; }); }
@@ -690,54 +650,32 @@ body{font-family:'Nunito',sans-serif;color:var(--ink);min-height:100vh;position:
       return n;
     }
 
-    /* ── Кеш у localStorage (та джерело для демо) ── */
-    function readCache(){ try{ var s=localStorage.getItem('sk_dynasty'); var a=s?JSON.parse(s):[]; return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+    /* ── Сховище у localStorage ── */
+    var STORE_KEY = 'rodyna_tree';
+    var OLD_KEY = 'sk_dynasty';   // старий ключ — переносимо один раз
+    function readCache(){
+      try{
+        var s=localStorage.getItem(STORE_KEY);
+        if(s==null){
+          s=localStorage.getItem(OLD_KEY);
+          if(s!=null){ localStorage.setItem(STORE_KEY, s); localStorage.removeItem(OLD_KEY); }
+        }
+        var a=s?JSON.parse(s):[]; return Array.isArray(a)?a:[];
+      }catch(e){ return []; }
+    }
     function writeCache(){
-      try{ localStorage.setItem('sk_dynasty', JSON.stringify(members)); }
+      try{ localStorage.setItem(STORE_KEY, JSON.stringify(members)); }
       catch(e){ toast('⚠️ Забракло памʼяті пристрою для фото'); }
-    }
-
-    // копії без dataURL-фото — саме це йде у хмару (фото не покидає пристрій)
-    function stripPhotos(list){
-      return list.map(function(m){
-        var c={};
-        for(var k in m){ if(k!=='photo'&&k!=='memories') c[k]=m[k]; }
-        c.memories = (m.memories||[]).map(function(x){
-          var d={}; for(var j in x){ if(j!=='photo') d[j]=x[j]; } return d;
-        });
-        return c;
-      });
-    }
-    // домержити локальні фото (з кешу) до завантажених із хмари даних — за id
-    function applyLocalPhotos(){
-      var cache=readCache(); if(!cache.length) return;
-      var pm={}, mm={};
-      cache.forEach(function(c){
-        if(!c || !c.id) return;
-        if(c.photo) pm[c.id]=c.photo;
-        (c.memories||[]).forEach(function(x){ if(x && x.id && x.photo) mm[c.id+'|'+x.id]=x.photo; });
-      });
-      members.forEach(function(m){
-        if(!m.photo && pm[m.id]) m.photo=pm[m.id];
-        (m.memories||[]).forEach(function(x){
-          if(x && !x.photo && mm[m.id+'|'+x.id]) x.photo=mm[m.id+'|'+x.id];
-        });
-      });
     }
 
     function persist(silent){
       writeCache();
-      if(_canWrite && window.SK && window.SK.saveDynasty){
-        window.SK.saveDynasty(stripPhotos(members)).then(function(){ if(!silent) toast('💾 Збережено'); })
-          .catch(function(){ if(!silent) toast('⚠️ Збережено лише на цьому пристрої'); });
-      } else if(!silent){
-        toast('💾 Збережено на цьому пристрої');
-      }
+      if(!silent) toast('💾 Збережено на цьому пристрої');
     }
 
     /* ── «Хто я в цьому дереві» ──
        Пріоритет: явна позначка isMe → вузол зі зв'язком self → нікого.
-       isMe зберігається разом з людиною, тож переживає синхронізацію з хмарою. */
+       isMe зберігається разом з людиною. */
     function resolveMe(){
       var flagged = members.filter(function(m){ return m.isMe; });
       // страхуємо від двох «Я» після ручних правок даних
