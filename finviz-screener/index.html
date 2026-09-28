@@ -68,6 +68,16 @@
     font:14px var(--mono);padding:6px 8px;background:#fff;
     border:1px solid var(--line);color:var(--ink);min-width:110px;
   }
+  input[type=text]{
+    font:600 15px var(--mono);padding:8px 10px;background:#fff;
+    border:1px solid var(--line);color:var(--ink);width:100%;
+    text-transform:uppercase;letter-spacing:.04em;
+  }
+  input[type=text]::placeholder{font-weight:400;letter-spacing:0;color:#9aa6b4;text-transform:none}
+  input[type=text]:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+  .grow{flex:1 1 240px;min-width:0}
+  .manual{border-left-color:var(--accent)}
+  .hint{font-size:12px;color:var(--ink-soft);margin:10px 0 0}
   .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-left:auto}
   button{
     font:600 14px system-ui,sans-serif;padding:9px 20px;cursor:pointer;
@@ -199,6 +209,19 @@
     </div>
   </form>
 
+  <form class="filters manual" id="quoteForm">
+    <div class="row">
+      <div class="grow">
+        <label class="lbl" for="tickers">Або подивитись конкретні тікери</label>
+        <input type="text" id="tickers" placeholder="AAPL, MSFT, TSLA" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="actions">
+        <button type="submit" id="lookup">Показати</button>
+      </div>
+    </div>
+    <p class="hint">До 15 тікерів через кому. Фільтри згори тут не діють — показую саме те, що ввели. Галочка «MACD-підтвердження» працює і тут.</p>
+  </form>
+
   <div class="status" id="status" aria-live="polite"></div>
   <div class="warn" id="warn" hidden></div>
 
@@ -238,7 +261,10 @@
 
   var el = {
     form:   document.getElementById("filters"),
+    quoteForm: document.getElementById("quoteForm"),
+    tickers:   document.getElementById("tickers"),
     scan:   document.getElementById("scan"),
+    lookup: document.getElementById("lookup"),
     csv:    document.getElementById("csv"),
     status: document.getElementById("status"),
     warn:   document.getElementById("warn"),
@@ -248,7 +274,9 @@
     empty:  document.getElementById("empty")
   };
 
-  var state = { rows: [], cols: COLS, sortKey: "change", sortDir: -1, macd: false, busy: false };
+  // mode: "screen" — результат скринера, "quote" — вручну введені тікери
+  var state = { rows: [], cols: COLS, sortKey: "change", sortDir: -1,
+                macd: false, busy: false, mode: "screen" };
 
   // ── форматування ──
   function dec(v, d) { return v === null || v === undefined ? "—" : Number(v).toFixed(d); }
@@ -272,62 +300,97 @@
     return q;
   }
 
-  function scan(e) {
-    if (e) e.preventDefault();
+  // Спільне для обох кнопок: один запит, один стан завантаження, одна таблиця.
+  function run(url, busyText, mode, withMacd) {
     if (state.busy) return;
-
-    var q = params();
-    var withMacd = q.get("macd") === "1";
     state.busy = true;
     el.scan.disabled = true;
+    el.lookup.disabled = true;
     el.csv.disabled = true;
     el.warn.hidden = true;
     el.empty.hidden = true;
     el.status.className = "status";
-    el.status.innerHTML = '<span class="spin"></span>Сканую NASDAQ, NYSE…' +
+    el.status.innerHTML = '<span class="spin"></span>' + busyText +
       (withMacd ? " Рахую MACD по денних свічках — це довше." : "");
 
-    fetch("/api/screen?" + q.toString(), { headers: { Accept: "application/json" } })
+    fetch(url, { headers: { Accept: "application/json" } })
       .then(function (r) {
         return r.json().then(function (data) { return { ok: r.ok, data: data }; })
           .catch(function () { throw new Error("сервер відповів не JSON (HTTP " + r.status + ")"); });
       })
       .then(function (res) {
-        if (!res.ok) throw new Error(res.data && res.data.error ? res.data.error : "HTTP помилка");
-        show(res.data, withMacd);
+        if (!res.ok) {
+          var e = new Error(res.data && res.data.error ? res.data.error : "HTTP помилка");
+          e.fromServer = true;            // сервер відповів — справа не у зв'язку
+          throw e;
+        }
+        show(res.data, withMacd, mode);
       })
       .catch(function (err) {
         state.rows = [];
+        state.mode = mode;
         render();
         el.wrap.hidden = true;
         el.empty.hidden = true;
         el.status.className = "status err";
-        el.status.textContent = "Не вдалося отримати дані: " + err.message +
-          ". Перевір, чи запущений app.py і чи є інтернет до Finviz.";
+        el.status.textContent = err.fromServer
+          ? err.message
+          : "Не вдалося отримати дані: " + err.message +
+            ". Перевір, чи запущений app.py і чи є інтернет до Finviz.";
       })
       .then(function () {
         state.busy = false;
         el.scan.disabled = false;
+        el.lookup.disabled = false;
       });
   }
 
-  function show(data, withMacd) {
+  function scan(e) {
+    if (e) e.preventDefault();
+    var q = params();
+    run("/api/screen?" + q.toString(), "Сканую NASDAQ, NYSE…", "screen", q.get("macd") === "1");
+  }
+
+  function lookup(e) {
+    if (e) e.preventDefault();
+    var raw = el.tickers.value.trim();
+    if (!raw) { el.tickers.focus(); return; }
+
+    var withMacd = document.getElementById("macd").checked;
+    var q = new URLSearchParams();
+    q.set("tickers", raw);
+    q.set("macd", withMacd ? "1" : "0");
+
+    var list = raw.toUpperCase().split(/[\s,;]+/).filter(Boolean).join(", ");
+    run("/api/quote?" + q.toString(), "Дивлюсь " + list + "…", "quote", withMacd);
+  }
+
+  function show(data, withMacd, mode) {
     state.rows = data.rows || [];
     state.macd = withMacd;
+    state.mode = mode;
     state.cols = withMacd ? COLS.concat(MACD_COLS) : COLS;
-    if (!state.cols.some(function (c) { return c.key === state.sortKey; })) state.sortKey = "change";
+    // Вручну введені тікери показуємо в тому порядку, як їх набрали.
+    if (mode === "quote") state.sortKey = null;
+    else if (!state.cols.some(function (c) { return c.key === state.sortKey; })) state.sortKey = "change";
 
     var errs = data.errors || [];
     el.warn.hidden = errs.length === 0;
-    if (errs.length) el.warn.textContent = "Частина бірж не відповіла — " + errs.join("; ");
+    if (errs.length) {
+      el.warn.textContent = (mode === "quote" ? "Не вдалось показати — " : "Частина бірж не відповіла — ") +
+        errs.join("; ");
+    }
 
     el.status.className = "status";
-    if (state.rows.length) {
-      var raw = data.stats && data.stats.raw ? data.stats.raw : state.rows.length;
+    var sec = " · " + (data.elapsed_sec || 0) + " с";
+    var raw = data.stats && data.stats.raw ? data.stats.raw : state.rows.length;
+    if (mode === "quote") {
+      el.status.textContent = "Показано: " + state.rows.length + " з " + raw + sec;
+    } else if (state.rows.length) {
       el.status.textContent = "Знайдено: " + state.rows.length + " з " + raw +
-        " після серверних фільтрів · " + (data.elapsed_sec || 0) + " с";
+        " після серверних фільтрів" + sec;
     } else {
-      el.status.textContent = "Знайдено: 0 · " + (data.elapsed_sec || 0) + " с";
+      el.status.textContent = "Знайдено: 0" + sec;
     }
 
     el.csv.disabled = state.rows.length === 0;
@@ -340,7 +403,9 @@
       el.wrap.hidden = true;
       el.body.innerHTML = "";
       el.empty.hidden = false;
-      el.empty.innerHTML = "<b>Нічого не знайшлося.</b><br>Спробуй RSI 40 або зніми умову тижня.";
+      el.empty.innerHTML = state.mode === "quote"
+        ? "<b>Нічого не показати.</b><br>Перевір написання тікера: Finviz знає біржові символи, як-от AAPL, MSFT або BRK-B."
+        : "<b>Нічого не знайшлося.</b><br>Спробуй RSI 40 або зніми умову тижня.";
       return;
     }
     el.empty.hidden = true;
@@ -376,6 +441,7 @@
           a.target = "_blank";
           a.rel = "noopener noreferrer";
           a.textContent = row.ticker;
+          if (row.company) a.title = row.company;
           td.appendChild(a);
         } else if (c.type === "num") {
           td.className = "num";
@@ -401,6 +467,7 @@
 
   function sorted() {
     var key = state.sortKey, dir = state.sortDir;
+    if (!key) return state.rows.slice();          // порядок, як ввели тікери
     return state.rows.slice().sort(function (a, b) {
       var x = a[key], y = b[key];
       var xn = x === null || x === undefined, yn = y === null || y === undefined;
@@ -441,8 +508,9 @@
   }
 
   el.form.addEventListener("submit", scan);
+  el.quoteForm.addEventListener("submit", lookup);
   el.csv.addEventListener("click", exportCsv);
-  el.status.textContent = "Постав фільтри і натисни «Сканувати».";
+  el.status.textContent = "Постав фільтри і натисни «Сканувати» — або введи тікери вручну.";
 })();
 </script>
 </body>

@@ -149,6 +149,66 @@ def add_macd(df):
     return df
 
 
+# ─────────────────────────── ОКРЕМІ ТІКЕРИ ───────────────────────────
+
+# Назви полів на сторінці quote.ashx → наші колонки (ті самі, що дає screen()).
+QUOTE_FIELDS = {
+    "Price": "Price",
+    "Change": "Change",
+    "Perf Week": "Perf Week",
+    "Perf Month": "Perf Month",
+    "RSI (14)": "RSI",
+}
+
+
+def fetch_quotes(tickers, pause=None, errors=None, progress=None):
+    """Картки окремих тікерів з Finviz, без жодних фільтрів.
+
+    Для ручного перегляду: користувач сам вводить тікери, а не шукає їх
+    скринером. Повертає DataFrame з тими самими колонками, що й screen(),
+    тому таблиця і фронтенд працюють з ним без змін. Порядок рядків —
+    як їх ввели. Тікер, якого Finviz не знає, потрапляє в `errors`,
+    решта обробляється далі.
+    """
+    from finvizfinance.quote import finvizfinance as Quote
+
+    pause = REQUEST_PAUSE if pause is None else pause
+    if errors is None:
+        errors = []
+
+    rows = []
+    for raw in tickers:
+        ticker = str(raw).strip().upper()
+        if not ticker:
+            continue
+        if progress:
+            progress(f"→ Finviz: {ticker} ...")
+        try:
+            fundament = Quote(ticker).ticker_fundament()
+        except Exception as e:
+            errors.append(f"{ticker}: {e}")
+            continue
+
+        row = {
+            "Ticker": ticker,
+            "Exchange": fundament.get("Exchange") or "",
+            "Company": fundament.get("Company") or "",
+        }
+        for src, dst in QUOTE_FIELDS.items():
+            row[dst] = fundament.get(src)
+        rows.append(row)
+        time.sleep(pause)
+
+    if not rows:
+        return pd.DataFrame()
+
+    df = pd.DataFrame(rows)
+    df["_chg"]   = df["Change"].apply(pct_to_float)
+    df["_week"]  = df["Perf Week"].apply(pct_to_float)
+    df["_month"] = df["Perf Month"].apply(pct_to_float)
+    return df
+
+
 # ─────────────────────────── СКРИНІНГ ───────────────────────────
 
 def screen(exchanges=None, rsi_filter=None, min_price=None, min_avg_vol=None,

@@ -17,6 +17,7 @@ Flask-бекенд для сторінки «Finviz Oversold Screener».
 """
 
 import os
+import re
 import sys
 import time
 
@@ -49,6 +50,11 @@ VOLUME_CHOICES = {
 }
 
 DEFAULTS = {"rsi": "30", "min_price": "5", "min_vol": "500K"}
+
+# Ручний ввід тікерів: Finviz віддає по одній сторінці на тікер, тож обмежуємо
+# кількість за раз, щоб не чекати хвилину і не впертись у ліміти.
+MAX_TICKERS = 15
+TICKER_RE = re.compile(r"^[A-Z][A-Z0-9.\-]{0,9}$")
 
 
 class BadParam(Exception):
@@ -125,6 +131,8 @@ def _rows(df, with_macd):
             "perf_month": _num(r.get("_month"), 2),
             "rsi":        _num(r.get("RSI"), 2),
         }
+        if "Company" in df.columns:
+            row["company"] = str(r.get("Company") or "")
         if with_macd:
             row["macd"] = _num(r.get("MACD"), 4)
             row["signal"] = _num(r.get("Signal"), 4)
@@ -195,6 +203,63 @@ def api_screen():
             "min_vol": min_vol or "будь-який", "day": day, "week": week,
             "month": month, "macd": macd,
         },
+    })
+
+
+@app.get("/api/quote")
+def api_quote():
+    """Картки окремих тікерів, введених вручну → JSON у тому ж форматі.
+
+    tickers=AAPL,MSFT  (кома, пробіл або ; як роздільник), macd=0
+    Фільтри скринера тут не діють — показуємо те, що попросили.
+    """
+    raw = (request.args.get("tickers") or "").strip().upper()
+    tickers = []
+    for part in re.split(r"[\s,;]+", raw):
+        if not part:
+            continue
+        if not TICKER_RE.match(part):
+            return jsonify({
+                "error": f"«{part}» не схоже на тікер: очікую 1–10 латинських літер або цифр",
+                "rows": [], "count": 0,
+            }), 400
+        if part not in tickers:
+            tickers.append(part)
+
+    if not tickers:
+        return jsonify({"error": "Введи хоча б один тікер", "rows": [], "count": 0}), 400
+    if len(tickers) > MAX_TICKERS:
+        return jsonify({
+            "error": f"За раз можна до {MAX_TICKERS} тікерів, а тут {len(tickers)}",
+            "rows": [], "count": 0,
+        }), 400
+
+    try:
+        macd = _flag("macd", False)
+    except BadParam as e:
+        return jsonify({"error": str(e), "rows": [], "count": 0}), 400
+
+    errors = []
+    started = time.time()
+    try:
+        df = fs.fetch_quotes(tickers, errors=errors)
+        if macd and len(df):
+            df = fs.add_macd(df)
+    except Exception as e:
+        app.logger.exception("fetch_quotes впав")
+        return jsonify({
+            "error": f"Не вдалося отримати дані: {e}",
+            "rows": [], "count": 0, "errors": errors,
+        }), 502
+
+    rows = _rows(df, macd) if len(df) else []
+    return jsonify({
+        "rows": rows,
+        "count": len(rows),
+        "errors": errors,
+        "stats": {"raw": len(tickers), "kept": len(rows)},
+        "elapsed_sec": round(time.time() - started, 1),
+        "params": {"tickers": tickers, "macd": macd},
     })
 
 
